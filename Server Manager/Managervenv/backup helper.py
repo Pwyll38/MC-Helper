@@ -17,7 +17,6 @@ def follow(thefile):
         yield line
 
 def backup():
-
     shutil.make_archive(BACKUP_LOCATION+"/Backup "+ time.ctime(), 'zip', SERVER_LOCATION+"/world", )
 
 logfile = open(SERVER_LOCATION+"/logs/latest.log", "r")
