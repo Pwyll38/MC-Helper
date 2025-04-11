@@ -23,7 +23,6 @@ print('\033[92m'+"====-----Backup Helper Live!----===="+'\033[0m')
 logfile = open(SERVER_LOCATION+"/logs/latest.log", "r")
 loglines = follow(logfile)
 for line in loglines:
-    print(time.perf_counter())
     if "[Server thread/INFO]: Server empty for 60 seconds, pausing" in line:
         print('\033[94m'+"Backup in progress..."+'\033[0m')
         backup()

@@ -1,4 +1,4 @@
-import discord, os, time
+import discord, os, time, random
 from dotenv import load_dotenv
 from discord.ext import tasks
 
@@ -10,6 +10,26 @@ TOKEN = os.getenv('TOKEN')
 
 client = discord.Client(intents=discord.Intents.all())
 
+general = client.get_channel(1358807353117642826)
+
+async def reactToLogs(logfile):
+
+    line = str(logfile.readline())
+
+    line = line.strip()
+
+    if not line or line == '':
+        return
+    
+    #Cases:
+
+    if('[Server thread/INFO]: Done' in line):
+        await client.change_presence(status=discord.Status.online, activity=discord.Game('Server is online!'))
+
+    
+    if('[Server thread/ERROR]' in line):
+        await client.change_presence(status=discord.Status.do_not_disturb, activity=discord.Game('Server is down ;-;'))
+        
 def initFile():
 
     logfile = open(SERVER_LOCATION+"/logs/latest.log", "r")
@@ -20,36 +40,30 @@ def initFile():
 @tasks.loop(seconds = 1)
 async def myLoop(logfile):
 
-    line = str(logfile.readline())
+    await reactToLogs(logfile)
 
-    line = line.strip()
-
-    if not line or line == '':
-        return
-    
-    general = client.get_channel(1358807353117642826)
-    
-    await general.send(line + ", goodbye!")
 
 @client.event
-async def on_ready():    
-    print("Im online")
+async def on_ready():
+
+    print('\033[92m'+"====-----Discord Bot Live!----===="+'\033[0m')
+
+    await client.change_presence(status=discord.Status.online)
 
     logfile = initFile()
 
     myLoop.start(logfile)
 
-
-
 @client.event
 async def on_message(message):
-    print (message.content)
     if message.author == client.user:
         return
 
     else:
-        await message.channel.send('Hello!')
-        await message.channel.send(str(message.channel))
 
+        #Cases:
+
+        if(message.content == '!generate'):
+            await message.channel.send(str(random.randrange(0,40)))
 
 client.run(TOKEN)
