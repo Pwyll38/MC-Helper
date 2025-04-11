@@ -10,7 +10,8 @@ TOKEN = os.getenv('TOKEN')
 
 client = discord.Client(intents=discord.Intents.all())
 
-general = client.get_channel(1358807353117642826)
+
+GENERAL = 1358807353117642826
 
 async def reactToLogs(logfile):
 
@@ -22,6 +23,7 @@ async def reactToLogs(logfile):
         return
     
     #Cases:
+    general = client.get_channel(1358807353117642826)
 
     if('[Server thread/INFO]: Done' in line):
         await client.change_presence(status=discord.Status.online, activity=discord.Game('Server is online!'))
@@ -29,6 +31,9 @@ async def reactToLogs(logfile):
     
     if('[Server thread/ERROR]' in line):
         await client.change_presence(status=discord.Status.do_not_disturb, activity=discord.Game('Server is down ;-;'))
+
+    if ('!ping' in line):
+        await general.send("Pong!")
         
 def initFile():
 
@@ -50,6 +55,8 @@ async def on_ready():
 
     await client.change_presence(status=discord.Status.online)
 
+    client.get_channel(GENERAL)
+
     logfile = initFile()
 
     myLoop.start(logfile)
@@ -65,5 +72,13 @@ async def on_message(message):
 
         if(message.content == '!generate'):
             await message.channel.send(str(random.randrange(0,40)))
+
+@client.event
+async def on_disconnect():
+    client.change_presence(status=discord.Status.offline)
+    client.logout()
+    client.close()
+    print('\033[91m'+"====--- Bot Disconnected ---====")
+
 
 client.run(TOKEN)
