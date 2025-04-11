@@ -31,7 +31,6 @@ async def myLoop(logfile):
     
     await general.send(line + ", goodbye!")
 
-
 @client.event
 async def on_ready():    
     print("Im online")
@@ -54,5 +53,3 @@ async def on_message(message):
 
 
 client.run(TOKEN)
-
-
