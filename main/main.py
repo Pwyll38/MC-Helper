@@ -10,7 +10,7 @@ def runServer():
         os.system("java -jar 'Server/server.jar'")
 
 def runTunneler():
-        os.system("start 'Tunneler/tunneler.exe'")
+        os.system("start 'Tunneler/bin/playit.exe'")
 
 def run_Systems():
 
