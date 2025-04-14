@@ -1,16 +1,16 @@
 import os, threading
 
 def runBackuper():
-        os.system("python3 'MC Helper/Server Manager/Managervenv/backup helper.py'")
+        os.system("python3 'MC Helper\\Server Manager\\Managervenv\\backup helper.py'")
 
 def runBot():
-        os.system("python3 'MC Helper/Discord Bot/Botvenv/bot.py'")
+        os.system("python3 'MC Helper\\Discord Bot\\Botvenv\\bot.py'")
 
 def runServer():
-        os.system("java -jar 'Server/server.jar'")
+        os.system("java -jar 'Server\\server.jar'")
 
 def runTunneler():
-        os.system("start 'Tunneler/bin/playit.exe'")
+        os.system("start 'Tunneler\\bin\\playit.exe'")
 
 def run_Systems():
 
