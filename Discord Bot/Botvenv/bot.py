@@ -1,8 +1,10 @@
 import discord, os, time, random
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
 
 load_dotenv()
+
+print("Env funcionanado: "+ str(load_dotenv(find_dotenv(), override=True)))
 
 SERVER_LOCATION = str(os.getenv("SERVER_LOCATION"))
 BACKUP_LOCATION = str(os.getenv("BACKUP_LOCATION"))
@@ -21,7 +23,7 @@ async def reactToLogs(logfile):
         return
     
     #Cases:
-    general = client.get_channel(CHANNEL_ID)
+    general = client.get_channel(CHANNEL_ID) or await client.fetch_channel(CHANNEL_ID)
 
     if('[Server thread\\INFO]: Done' in line):
         await client.change_presence(status=discord.Status.online, activity=discord.Game('Server is online!'))
