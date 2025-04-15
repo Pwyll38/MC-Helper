@@ -1,7 +1,6 @@
 import discord, os, time, random
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
-import nacl.secret
 
 load_dotenv()
 
