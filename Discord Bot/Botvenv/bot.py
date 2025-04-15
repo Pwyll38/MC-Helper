@@ -1,7 +1,7 @@
 import discord, os, time, random
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
-from mcstatus import JavaServer
+import nacl.secret
 
 load_dotenv()
 
@@ -11,6 +11,7 @@ SERVER_LOCATION = str(os.getenv("SERVER_LOCATION"))
 BACKUP_LOCATION = str(os.getenv("BACKUP_LOCATION"))
 TOKEN = os.getenv('TOKEN')
 CHANNEL_ID = os.getenv('CHANNEL_ID')
+FFMPEG = os.getenv('FFMPEG')
 
 client = discord.Client(intents=discord.Intents.all())
 
@@ -35,6 +36,18 @@ async def reactToLogs(logfile):
 
     if ('!ping' in line):
         await general.send("Pong!")
+
+    if ('!pipe'):
+        
+        source = discord.FFmpegOpusAudio(executable=FFMPEG,source='MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
+        vChannel = client.get_channel(1358807353574559944)
+
+        vClient = await vChannel.connect()
+
+        vClient.stop()
+
+        vClient.play(source)
+
         
 def initFile():
 
