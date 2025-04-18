@@ -1,58 +1,31 @@
-import discord, os, time, random
+import discord, os, random
 from dotenv import load_dotenv, find_dotenv
-from discord.ext import tasks
-import nacl
+from discord.ext import tasks, commands
+import asyncio
+import re
 
+# Load environment variables
 load_dotenv()
 
-print("Env funcionanado: "+ str(load_dotenv(find_dotenv(), override=True)))
-
-SERVER_LOCATION = str(os.getenv("SERVER_LOCATION"))
-BACKUP_LOCATION = str(os.getenv("BACKUP_LOCATION"))
+SERVER_LOCATION = os.getenv("SERVER_LOCATION")
+BACKUP_LOCATION = os.getenv("BACKUP_LOCATION")
 TOKEN = os.getenv('TOKEN')
-CHANNEL_ID = os.getenv('CHANNEL_ID')
-FFMPEG = os.getenv('FFMPEG')
+CHANNEL_ID = int(os.getenv('CHANNEL_ID')) if os.getenv('CHANNEL_ID') else None
+PIPE_SOURCE = ".\\assets\\pipe.mp3"
 
-client = discord.Client(intents=discord.Intents.all(), description="A bee bot")
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
 
-async def reactToLogs(logfile):
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-    line = str(logfile.readline())
+async def getChannels():
+    global channelVoice
+    global channelText
 
-    line = line.strip()
+    channelText = discord.utils.get(bot.get_all_channels(), name='william-botner')
+    channelVoice = discord.utils.get(bot.get_all_channels(), name='Gritaria Usual')
 
-    if not line or line == '':
-        return
-    
-    #Cases:
-    general = client.get_channel(CHANNEL_ID) or await client.fetch_channel(CHANNEL_ID)
-
-    if('[Server thread\\INFO]: Done' in line):
-        await client.change_presence(status=discord.Status.online, activity=discord.Game('Server is online!'))
-
-    
-    if('[Server thread\\ERROR]' in line):
-        await client.change_presence(status=discord.Status.do_not_disturb, activity=discord.Game('Server is down ;-;'))
-
-    if ('!ping' in line):
-        await general.send("Pong!")
-
-    if ('!pipe'):
-        
-        source = discord.FFmpegOpusAudio(executable=FFMPEG,source='MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
-        vChannel = client.get_channel(1358807353574559944)
-
-        vClient = await vChannel.connect()
-
-        vClient.stop()
-
-        vClient.play(source)
-
-    if ("!gae"):
-        await general.send("Você está "+ random.randint(0,101)+ f"% gae hoje!")
-
-
-        
 def initFile():
 
     logfile = open(SERVER_LOCATION+"\\logs\\latest.log", "r")
@@ -60,63 +33,97 @@ def initFile():
 
     return logfile
 
-@tasks.loop(seconds = 1)
-async def myLoop(logfile):
+@tasks.loop(seconds=1)
+async def reactToLogs(logFile):
+    try:
+        line = logFile.readline()
+        if line:
+            if re.search(r'\[Server thread/INFO\]: Done', line):
+                print("Server is online!")
+                await bot.change_presence(status=discord.Status.online, activity=discord.Game('Server is online!'))
+            
+            elif re.search(r'\[Server thread/INFO\]: Stopping the server', line):
+                print("Server is stopping...")
+                await bot.change_presence(status=discord.Status.idle, activity=discord.Game('Server is stopping...'))
+                
+            elif re.search(r'\[Server thread/ERROR\]: Exception', line):
+                print("Server is in error state!")
+                await bot.change_presence(status=discord.Status.dnd, activity=discord.Game('Server is in error state!'))
+            
+            elif re.search(r'\[Server thread/INFO\]:', line):
+                match = re.search(r'\[Server thread/INFO\]: (\w+)\[', line)
+                if match:
+                    player = match.group(1)
+                    if channelText:
+                        await channelText.send(f"O(a) jogador(a) {player} entrou no servidor.")
+                        print(f"O(a) jogador(a) {player} entrou no servidor.")
 
-    await reactToLogs(logfile)
+                match = re.search(r'\[Server thread/INFO\]: <.*?> (.+)', line)
+                if match:
+                    command = match.group(1)
+                    if command == "!pipe":
+                        if channelVoice:
+                            voice_client = await channelVoice.connect()
+                            voice_client.play(discord.FFmpegPCMAudio(PIPE_SOURCE), after=lambda e: print(f'Finished playing: {e}'))
+                            while voice_client.is_playing():
+                                await asyncio.sleep(1)
+                            await voice_client.disconnect()
+                            print(f'Finished playing pipe sound in {channelVoice.name}')
+                        else:
+                            print('Channel "Gritaria Usual" not found.')
+                    elif command == "!ping":
+                        if channelText:
+                            await channelText.send('Pong!')
+                            print('Pong!')
 
+    except Exception as e:
+        print(f"Error reading log file: {e}")
 
-@client.event
+@bot.event
 async def on_ready():
+    print(f'Logged in as {bot.user.name} - {bot.user.id}')
+    print('------')
 
-    print('\033[92m'+"====-----Discord Bot Live!----===="+'\033[0m')
+    logFile = initFile()
+    
+    await getChannels()
+    await reactToLogs.start(logFile)
 
-    await client.change_presence(status=discord.Status.online)
-
-    client.get_channel(CHANNEL_ID)
-
-    logfile = initFile()
-
-    myLoop.start(logfile)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
+@bot.command()
+async def pipe(ctx=None):
+    """Plays a pipe sound on the channel 'Gritaria Usual'."""
+    channel = discord.utils.get(ctx.guild.voice_channels, name='Gritaria Usual')
+    if channel:
+        try:
+            voice_client = await channel.connect()
+            voice_client.play(discord.FFmpegPCMAudio(PIPE_SOURCE), after=lambda e: print(f'Finished playing: {e}'))
+            while voice_client.is_playing():
+                await asyncio.sleep(1)
+            await voice_client.disconnect()
+            print(f'Finished playing pipe sound in {channel.name}')
+        except discord.ClientException as e:
+            await ctx.send('Bot is already connected to a voice channel.')
+            print(f'Error: {e}')
     else:
-        general = message.channel or await client.fetch_channel(CHANNEL_ID)
+        await ctx.send('Channel "Gritaria Usual" not found.')
 
+@bot.command()
+async def ping(ctx):
+    """Responds with Pong!"""
+    await ctx.send('Pong!')
 
-    #Cases:
+@bot.command()
+async def gae(ctx):
+    """Responds with a random percentage of being gae."""
+    await ctx.send(f'Você está {random.randint(0, 100)}% gae hoje!')
+    
+@bot.command()
+async def snek(ctx):
+    """Responds with a random percentage of being snek."""
+    await ctx.send("Aqui uma cobra chique: ", file=discord.File(".\\assets\\Dapper snek.png"))
 
-        if(message.content == '!generate'):
-            await message.channel.send(str(random.randrange(0,40)))
-
-        if (message.content =="!gae"):
-            await general.send("Você está "+ str(random.randint(0,101))+ f"% gae hoje!")
-
-        if (message.content =="!dapperSnake"):
-            await general.send("Aqui uma cobra chique: ", file=discord.File("..//..//assets//Dapper snek.png"))
-
-        if ( message.content =='!pipe'):
-        
-            source = discord.FFmpegOpusAudio(executable=FFMPEG,source='MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
-            vChannel = client.get_channel(1358807353574559944)
-
-            vClient = await vChannel.connect()
-
-            vClient.play(source)
-
-            vClient.stop()
-
-
-
-@client.event
-async def on_disconnect():
-    client.change_presence(status=discord.Status.offline)
-    client.close()
-    print('\033[91m'+"====--- Bot Disconnected ---====")
-
-
-client.run(TOKEN)
+# Run the bot
+if TOKEN:
+    bot.run(TOKEN)
+else:
+    print("Error: Bot token not found. Please set it in the .env file.")
