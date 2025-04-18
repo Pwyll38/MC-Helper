@@ -2,6 +2,9 @@ import discord, os, time, random
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
 
+import pyjokes
+import pyjokes.jokes_en
+
 load_dotenv()
 
 print("Env funcionanado: "+ str(load_dotenv(find_dotenv(), override=True)))
@@ -47,6 +50,10 @@ async def reactToLogs(logfile):
 
         vClient.play(source)
 
+    if ("!gae"):
+        await general.send("Você está "+ random.randint(0,101)+ f"% gae hoje!")
+
+
         
 def initFile():
 
@@ -80,16 +87,23 @@ async def on_message(message):
         return
 
     else:
-
-        #Cases:
+        general = message.channel or await client.fetch_channel(CHANNEL_ID)
+    #Cases:
 
         if(message.content == '!generate'):
             await message.channel.send(str(random.randrange(0,40)))
 
+        if (message.content =="!gae"):
+            await general.send("Você está "+ str(random.randint(0,101))+ f"% gae hoje!")
+
+        if (message.content =="!dapperSnake"):
+            await general.send("Aqui uma cobra chique: ", file=discord.File("..//..//assets//Dapper snek.png"))
+
+
+
 @client.event
 async def on_disconnect():
     client.change_presence(status=discord.Status.offline)
-    client.logout()
     client.close()
     print('\033[91m'+"====--- Bot Disconnected ---====")
 
