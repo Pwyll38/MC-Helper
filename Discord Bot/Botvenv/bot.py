@@ -1,9 +1,7 @@
 import discord, os, time, random
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
-
-import pyjokes
-import pyjokes.jokes_en
+import nacl
 
 load_dotenv()
 
@@ -15,7 +13,7 @@ TOKEN = os.getenv('TOKEN')
 CHANNEL_ID = os.getenv('CHANNEL_ID')
 FFMPEG = os.getenv('FFMPEG')
 
-client = discord.Client(intents=discord.Intents.all())
+client = discord.Client(intents=discord.Intents.all(), description="A bee bot")
 
 async def reactToLogs(logfile):
 
@@ -88,6 +86,8 @@ async def on_message(message):
 
     else:
         general = message.channel or await client.fetch_channel(CHANNEL_ID)
+
+
     #Cases:
 
         if(message.content == '!generate'):
@@ -98,6 +98,17 @@ async def on_message(message):
 
         if (message.content =="!dapperSnake"):
             await general.send("Aqui uma cobra chique: ", file=discord.File("..//..//assets//Dapper snek.png"))
+
+        if ( message.content =='!pipe'):
+        
+            source = discord.FFmpegOpusAudio(executable=FFMPEG,source='MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
+            vChannel = client.get_channel(1358807353574559944)
+
+            vClient = await vChannel.connect()
+
+            vClient.play(source)
+
+            vClient.stop()
 
 
 
