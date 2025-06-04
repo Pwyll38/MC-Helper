@@ -14,6 +14,16 @@ FFMPEG = os.getenv('FFMPEG')
 
 client = discord.Client(intents=discord.Intents.all(), description="A bee bot")
 
+async def playSound(file):
+    source = discord.FFmpegOpusAudio(executable=FFMPEG,source=file)
+    vChannel = client.get_channel(1358807353574559944)
+
+    vClient = await vChannel.connect()
+
+    vClient.play(source)
+
+    vClient.stop()
+
 async def reactToLogs(logfile):
 
     line = str(logfile.readline())
@@ -99,16 +109,9 @@ async def on_message(message):
             await general.send("Aqui uma cobra chique: ", file=discord.File("..//..//assets//Dapper snek.png"))
 
         if ( message.content =='!pipe'):
+
+            await playSound('MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
         
-            source = discord.FFmpegOpusAudio(executable=FFMPEG,source='MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')
-            vChannel = client.get_channel(1358807353574559944)
-
-            vClient = await vChannel.connect()
-
-            vClient.play(source)
-
-            vClient.stop()
-
 
 
 @client.event
