@@ -7,8 +7,11 @@ SERVER_LOCATION = str(os.getenv("SERVER_LOCATION"))
 BACKUP_LOCATION = str(os.getenv("BACKUP_LOCATION"))
 
 def backup():
-    windowsReadableTime = time.ctime().replace(":",".")
-    shutil.make_archive(BACKUP_LOCATION+"\\Backup "+ windowsReadableTime, 'zip', SERVER_LOCATION+"\\world")
+    try:
+        windowsReadableTime = time.ctime().replace(":",".")
+        shutil.make_archive(BACKUP_LOCATION+"\\Backup "+ windowsReadableTime, 'zip', SERVER_LOCATION+"\\world")
+    except Exception as error:
+        print("Error starting backup: "+ str(error))
 
 print('\033[92m'+"====-----Backup Helper Live!----===="+'\033[0m')
 
