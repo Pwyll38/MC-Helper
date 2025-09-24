@@ -28,7 +28,7 @@ client = discord.Client(intents=discord.Intents.all(), description="A bee bot")
 
 async def reactToLogs(logfile):
 
-    line = str(logfile.readline()).stip()
+    line = str(logfile.readline()).strip()
 
     if not line or line == '':
         return
@@ -74,7 +74,8 @@ async def on_ready():
     client.get_channel(CHANNEL_ID)
     
     try:
-        logFile = open(SERVER_LOCATION+"/logs/latest.log", "r").seek(0,2)
+        logFile = open(SERVER_LOCATION+"/logs/latest.log", "r")
+        logFile.seek(0,2)
         logLoop.start(logFile)
 
         print('Log file module is online!')
