@@ -1,9 +1,16 @@
-### Criar env: 
+### Pythonenv:
 
 python3 -m venv my-venv
 my-venv/bin/pip install some-python-library
 
+from MC Helper/env dir: bin/python -m pip list
+
+Select intepreter manually
+
+Para rodar: bin/python bot.py
+
 ### Libs necessarias:
+
 Dovenv
 Discord
 ffmpeg https://www.youtube.com/watch?v=JR36oH35Fgg
@@ -14,7 +21,7 @@ ByteString
 
 https://github.com/py-mine/mcstatus
 
-### .env: 
+### .env:
 
 TOKEN=
 SERVER_LOCATION="C:\\Users\\diasc\\Desktop\\Little Server\\MC-Server"
