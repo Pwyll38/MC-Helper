@@ -2,6 +2,7 @@ import discord, os, time, random
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import tasks
 from mcstatus import JavaServer
+import wikipedia
 
 load_dotenv()
 
@@ -25,6 +26,14 @@ client = discord.Client(intents=discord.Intents.all(), description="A bee bot")
     vClient.play(source)
 
     vClient.stop()"""
+
+def getRandomWikiSummary():
+    pageName = wikipedia.random(1)
+    try:
+        return f"# {pageName} \n{wikipedia.page(pageName).summary}"
+    except Exception as e:
+        return "No wisdom, try again!"
+
 
 async def reactToLogs(logfile):
 
@@ -95,6 +104,9 @@ async def on_message(message):
 
     #Discord chat cases:
 
+        if(message.content == '!help'):
+            await message.channel.send("My commands are: \n 1) !generate \n 2) !gae \n 3) !dapperSnake \n 4) !server \n 5) !pipe (WIP) \n 6) !wordle (WIP)\n 7) !russianroulette \n 8) !wisdom")
+
         if(message.content == '!generate'):
             await message.channel.send(str(random.randrange(0,40)))
 
@@ -115,6 +127,18 @@ async def on_message(message):
 
         """if ( message.content =='!pipe'):
             await playSound('MC-Helper\\Discord Bot\\Botvenv\\assets\\pipe.mp3')"""
+        
+        if(message.content == '!wordle'):
+            await message.channel.send("-----")
+
+        if(message.content == '!russianroulette'):
+            if(random.randint(0,6) == 1):
+                await message.channel.send("YOU DIED")
+            else:
+                await message.channel.send("You lived!!")
+
+        if(message.content == '!wisdom'):
+            await message.channel.send(getRandomWikiSummary())
 
 
 @client.event
